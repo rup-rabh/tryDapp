@@ -4,12 +4,12 @@ import Navbar from './Navbar';
 import { ethers } from 'ethers';
 //https://mainnet.infura.io/v3/3f65525bb69e48ee9ac83ceadfb58c69
 //3f65525bb69e48ee9ac83ceadfb58c69
-const infLink = "https://mainnet.infura.io/v3/3f65525bb69e48ee9ac83ceadfb58c69";
+const network = "sepolia";
+const key = "3f65525bb69e48ee9ac83ceadfb58c69";
+const infLink = `https://${network}.infura.io/v3/${key}`;
 function Home() {
-  // const [walletConnected, setWalletConnected] = useState(false);
   const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,setProvider,provider} = useWallet();
-  
-  // const [walletAddress, setWalletAddress] = useState('');
+
   const [errorMessage, setErrorMessage] = useState('');
 
   const getAccountBalance = async (provider, address) => {
@@ -30,26 +30,27 @@ function Home() {
 
   // Connect to MetaMask wallet and save to localStorage
   const connectWallet = async () => {
-    
-    try {
       
-      if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
-        // const provider = new ethers.BrowserProvider(window.ethereum); // Changed according to the latest ethers.js version
-        const provider = new ethers.JsonRpcProvider(infLink); // Changed according to the latest ethers.js version
+      try {
         
-        const accounts = await provider.send('eth_requestAccounts', []);
-        const address = accounts[0];
+        if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
+          const provider = new ethers.BrowserProvider(window.ethereum); // Changed according to the latest ethers.js version
+          
+          const accounts = await provider.send('eth_requestAccounts', []);
+          const address = accounts[0];
 
-        setWalletConnected(true);
-        setWalletAddress(address);
-        setProvider(provider);
-        
-        console.log("iswalConntect?",isWalletConnected);
-        localStorage.setItem('walletAddress', address); // Persist wallet connection
-      } else {
-        setErrorMessage('MetaMask is not installed!');
-      }
+          setWalletConnected(true);
+          setWalletAddress(address);
+          setProvider(provider);
+          
+          console.log("iswalConntect?",isWalletConnected);
+          localStorage.setItem('walletAddress', address); // Persist wallet connection
+        } else {
+          setErrorMessage('MetaMask is not installed!');
+        }
     } catch (error) {
+      console.log(error);
+      
       setErrorMessage('An error occurred while connecting to wallet.');
     }
   };

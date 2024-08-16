@@ -1,29 +1,37 @@
 import React,{useEffect,useState} from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import { ethers } from 'ethers';
+
+const erc20Abi = [
+  "function transfer(address to, uint256 amount) returns (bool)"
+];
+
 function TokenTransfer() {
   const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,provider} = useWallet();
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('');
-  const tokenAddress = 'YOUR_TOKEN_CONTRACT_ADDRESS';
 
+  
   const getAccountBalance = async (provider, address) => {
     const balance = await provider.getBalance(address);
     return ethers.formatEther(balance);
   };  
+
   const handleTransfer = async () => {
-    if (!provider) {
-      setStatus('Wallet not connected');
+    if (!provider || !walletAddress) {
+      setStatus('Please connect your wallet');
       return;
     }
 
     try {
-      const signer = provider.getSigner();
-      const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, signer);
-      const tx = await tokenContract.transfer(recipient, ethers.utils.parseUnits(amount, 18)); // Assuming 18 decimals
+      const accounts = await provider.send("eth_requestAccounts", []);
+      // const signer = await provider.getSigner(accounts[0]);
+      const signer = await provider.getSigner(walletAddress);
+      const tokenContract = new ethers.Contract(walletAddress, erc20Abi, signer);
+      const tx = await tokenContract.transfer(recipient, ethers.parseUnits(amount, 18)); 
       setStatus('Transaction sent, waiting for confirmation...');
-      await tx.wait(); // Wait for transaction to be mined
+      await tx.wait(); 
       setStatus('Transfer successful');
     } catch (error) {
       setStatus(`Error: ${error.message}`);
@@ -55,18 +63,3 @@ export default TokenTransfer;
 
 
 
-
-
-
-//i was above return
-// useEffect(() => {
-//   const storedWalletAddress = localStorage.getItem('walletAddress');
-//   if (storedWalletAddress) {
-//     setWalletConnected(true);
-//     setWalletAddress(storedWalletAddress);
-//   }
-//   console.log(storedWalletAddress);
-//   // console.log("Hello from TT",provider);
-  
-        //I am a tester
-// }, []);
