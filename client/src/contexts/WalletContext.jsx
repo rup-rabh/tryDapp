@@ -9,6 +9,7 @@ export const WalletProvider = ({ children }) => {
   const [isWalletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [loading , setLoading] = useState(true);
+  const [provider, setProvider] = useState(null);
   const toHost ={
     isWalletConnected:isWalletConnected,
     setWalletConnected:setWalletConnected,
@@ -16,6 +17,8 @@ export const WalletProvider = ({ children }) => {
     setWalletAddress:setWalletAddress,
     loading:loading,
     setLoading:setLoading,
+    provider:provider,
+    setProvider:setProvider,
   }
 
   return (

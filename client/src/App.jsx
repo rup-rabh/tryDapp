@@ -8,15 +8,20 @@ import TokenAllowance from './components/TokenAllowance';
 import Layout from './components/Layout';
 // import Navbar from './components/Navbar';
 import { useWallet } from './contexts/WalletContext';
+import { ethers } from 'ethers';
+const infLink = "https://mainnet.infura.io/v3/3f65525bb69e48ee9ac83ceadfb58c69";
 
 function App() {
-  const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,loading,setLoading} = useWallet();
-
-
+  const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,loading,setLoading,setProvider} = useWallet();
 
   useEffect(() => {
     const storedWalletAddress = localStorage.getItem('walletAddress');
     if (storedWalletAddress) {
+      console.log("I ran first");
+      
+      // const tempProvider = new ethers.BrowserProvider(window.ethereum);
+      const tempProvider = new ethers.JsonRpcProvider(infLink);
+      setProvider(tempProvider);
       setWalletConnected(true);
       setWalletAddress(storedWalletAddress);
     }

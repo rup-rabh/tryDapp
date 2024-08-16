@@ -2,14 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import Navbar from './Navbar';
 import { ethers } from 'ethers';
-
+//https://mainnet.infura.io/v3/3f65525bb69e48ee9ac83ceadfb58c69
+//3f65525bb69e48ee9ac83ceadfb58c69
+const infLink = "https://mainnet.infura.io/v3/3f65525bb69e48ee9ac83ceadfb58c69";
 function Home() {
   // const [walletConnected, setWalletConnected] = useState(false);
-  const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress} = useWallet();
+  const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,setProvider,provider} = useWallet();
   
   // const [walletAddress, setWalletAddress] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const getAccountBalance = async (provider, address) => {
+    const balance = await provider.getBalance(address);
+    return ethers.formatEther(balance);
+  };
+  
   // Check if wallet is already connected (from localStorage)
   useEffect(() => {
     const storedWalletAddress = localStorage.getItem('walletAddress');
@@ -18,7 +25,7 @@ function Home() {
       setWalletAddress(storedWalletAddress);
     }
     console.log(storedWalletAddress);
-    
+    //I run at t = 0
   }, []);
 
   // Connect to MetaMask wallet and save to localStorage
@@ -27,12 +34,17 @@ function Home() {
     try {
       
       if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
-        const provider = new ethers.BrowserProvider(window.ethereum); // Changed according to the latest ethers.js version
+        // const provider = new ethers.BrowserProvider(window.ethereum); // Changed according to the latest ethers.js version
+        const provider = new ethers.JsonRpcProvider(infLink); // Changed according to the latest ethers.js version
+        
         const accounts = await provider.send('eth_requestAccounts', []);
         const address = accounts[0];
+
         setWalletConnected(true);
         setWalletAddress(address);
-        console.log("iswalConntect",isWalletConnected);
+        setProvider(provider);
+        
+        console.log("iswalConntect?",isWalletConnected);
         localStorage.setItem('walletAddress', address); // Persist wallet connection
       } else {
         setErrorMessage('MetaMask is not installed!');
@@ -64,6 +76,9 @@ function Home() {
           <Navbar/>
           <h1>Welcome to Crypto-Portfolio App</h1>
           <p>Connected to: {walletAddress}</p>
+
+          <button onClick={()=>getAccountBalance(provider,walletAddress).then((bal)=>console.log(bal))}>Check Balance in logs</button> 
+          <br /> 
           <button onClick={disconnectWallet}>Disconnect Wallet</button>
 
         </div>

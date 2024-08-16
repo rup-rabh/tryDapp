@@ -2,17 +2,9 @@ import React,{useEffect} from 'react';
 import { useWallet } from '../contexts/WalletContext';
 
 function HistoricalData() {
-  const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress} = useWallet();
-
-  useEffect(() => {
-    const storedWalletAddress = localStorage.getItem('walletAddress');
-    if (storedWalletAddress) {
-      setWalletConnected(true);
-      setWalletAddress(storedWalletAddress);
-    }
-    console.log(storedWalletAddress);
-    
-  }, []);
+  const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,provider} = useWallet();
+  console.log(walletAddress);
+  
   return (
     <div>
       <h1>Historical Data</h1>
