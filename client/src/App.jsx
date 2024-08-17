@@ -2,13 +2,12 @@ import React,{useEffect} from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './components/Home';
 import WatchList from './components/Watchlist';
-import HistoricalData from './components/HistoricalData';
 import TokenTransfer from './components/TokenTransfer';
 import TokenAllowance from './components/TokenAllowance';
 import Layout from './components/Layout';
-// import Navbar from './components/Navbar';
 import { useWallet } from './contexts/WalletContext';
 import { ethers } from 'ethers';
+import './App.css'
 
 function App() {
   //wallet context

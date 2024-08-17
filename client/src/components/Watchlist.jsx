@@ -50,10 +50,11 @@ function Watchlist() {
         }
         const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
         const symbol = await tokenContract.symbol();
-        const balance = await tokenContract.balanceOf(walletAddress); // Corrected to fetch balance for walletAddress
+        const balance = await tokenContract.balanceOf(tokenAddress); // Corrected to fetch balance for walletAddress
         const formattedDecimals = 18;
         const formattedBalance = ethers.formatUnits(balance, formattedDecimals);
-
+        console.log(balance);
+        
         const tokenData = {
           address: tokenAddress,
           symbol: symbol,
@@ -75,9 +76,10 @@ function Watchlist() {
   };
 
   return (
-    <div>
+    <div className='flex flex-col justify-around items-center'>
       <h1>Watchlist</h1>
-      
+      Please provide Standard ERC-20 tokens
+      <br />
       <input
         type="text"
         value={tokenAddress}
@@ -88,7 +90,9 @@ function Watchlist() {
 
       <ul>
         {watchlist.map((token) => (
-          <li key={token.address}>
+          
+          
+          <li key={token.address} className='m-5 p-5'>
             <p>Token: {token.symbol}</p>
             <p>Balance: {token.balance}</p>
             <button onClick={() => openModal(token)}>View Details</button>
@@ -99,16 +103,18 @@ function Watchlist() {
 
       {/* Modal for showing token details */}
       <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
-      {selectedToken && selectedToken.address && (
-    <div>
-      <h2>{selectedToken.symbol} Details</h2>
-      <p>Balance: {selectedToken.balance}</p>
-      <p>Decimals: {selectedToken.decimals}</p>
-      {/* Render HistoricalData only when selectedToken.address is valid */}
-      <HistoricalData tokenAddress={selectedToken.address} />
-      <button onClick={closeModal}>Close</button>
-    </div>
-  )}
+        {selectedToken && selectedToken.address && (
+          <div className='text-black bg-black h-full'>
+            <h1>{selectedToken.symbol} Details</h1>
+            <p>Balance: {selectedToken.balance}</p>
+            <p>Decimals: {selectedToken.decimals}</p>
+            {/* Render HistoricalData only when selectedToken.address is valid */}
+            <div className='bg-black'>
+            <HistoricalData tokenAddress={selectedToken.address} />
+            </div>
+            <button onClick={closeModal}>Close</button>
+          </div>
+        )}
       </Modal>
     </div>
   );

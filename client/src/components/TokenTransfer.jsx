@@ -39,8 +39,8 @@ function TokenTransfer() {
   };
 
   return (
-    <div>
-      <h2>Transfer Tokens</h2>
+    <div className=''>
+      <h1>Transfer Tokens</h1>
       <input
         type="text"
         placeholder="Recipient Address"
@@ -48,6 +48,7 @@ function TokenTransfer() {
         onChange={(e) => setRecipient(e.target.value)}
       />
       <input
+      
         type="text"
         placeholder="Amount"
         value={amount}

@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '../contexts/WalletContext';
-import Navbar from './Navbar';
 import { ethers } from 'ethers';
-//https://mainnet.infura.io/v3/3f65525bb69e48ee9ac83ceadfb58c69
-//3f65525bb69e48ee9ac83ceadfb58c69
-const network = "sepolia";
-const key = "3f65525bb69e48ee9ac83ceadfb58c69";
-const infLink = `https://${network}.infura.io/v3/${key}`;
+import Layout from './Layout';
+
 function Home() {
   const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,setProvider,provider} = useWallet();
 
   const [errorMessage, setErrorMessage] = useState('');
-
+  const [balance,setBalance] = useState("Click above");
   const getAccountBalance = async (provider, address) => {
-    const balance = await provider.getBalance(address);
-    return ethers.formatEther(balance);
+    const bal = await provider.getBalance(address);
+    return ethers.formatEther(bal);
   };
   
   // Check if wallet is already connected (from localStorage)
@@ -73,13 +69,14 @@ function Home() {
         </div>
       ) : (
         <div>
-          <Navbar/>
-          <h1>Welcome to Crypto-Portfolio App</h1>
-          <p>Connected to: {walletAddress}</p>
-
-          <button onClick={()=>getAccountBalance(provider,walletAddress).then((bal)=>console.log(bal))}>Check Balance in logs</button> 
-          <br /> 
-          <button onClick={disconnectWallet}>Disconnect Wallet</button>
+          <Layout>
+            <h1>Welcome to Crypto-Portfolio App</h1>
+            <p>Connected to: {walletAddress}</p>
+            <button onClick={()=>getAccountBalance(provider,walletAddress).then((bal)=>setBalance(bal))}>Check Balance</button> 
+              <p>Balance : {balance}</p>
+            <br /> 
+            <button onClick={disconnectWallet}>Disconnect Wallet</button>
+          </Layout>
 
         </div>
       )

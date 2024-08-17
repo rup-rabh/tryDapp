@@ -30,8 +30,9 @@ function HistoricalData({ tokenAddress }) {
 
       const response = await fetch(url);
       const data = await response.json();
-      // console.log(startTimestamp+"  "+endTimestamp);
+      console.log(startTimestamp+"  "+endTimestamp);
       
+      // console.log(data);
       
       if (data.status === '1') {
         const filteredData = data.result.filter(tx => {
@@ -49,11 +50,14 @@ function HistoricalData({ tokenAddress }) {
   };
 
   return (
-    <div>
+    <div className='text-white bg-lime-900'>
       <h2>Historical Data for {tokenAddress}</h2>
-      <div>
+      <div className='bg-blue-500 p-10'>
         <label>Select Date Range:</label>
+        <br />
         <DatePicker selected={startDate} onChange={date => setStartDate(date)} />
+          <br />
+          <br />
         <DatePicker selected={endDate} onChange={date => setEndDate(date)} />
       </div>
       {loading ? (
@@ -61,7 +65,7 @@ function HistoricalData({ tokenAddress }) {
       ) : (
         <div>
           {historicalData.length > 0 ? (
-            <ul>
+            <ul className='p-5 border-dotted'>
               {historicalData.map((tx, index) => (
                 <li key={index}>
                   <p>Transaction Hash: {tx.hash}</p>
@@ -69,6 +73,7 @@ function HistoricalData({ tokenAddress }) {
                   <p>To: {tx.to}</p>
                   <p>Value: {ethers.formatUnits(tx.value, 18)}</p>
                   <p>Date: {new Date(tx.timeStamp * 1000).toLocaleDateString()}</p>
+                  <p>______________________________________________</p>
                 </li>
               ))}
             </ul>
