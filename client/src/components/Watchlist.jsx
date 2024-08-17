@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { useWallet } from '../contexts/WalletContext';
+import Modal from 'react-modal';
+import HistoricalData from './HistoricalData';
 
 const ERC20_ABI = [
   "function symbol() view returns (string)",
@@ -12,6 +14,8 @@ function Watchlist() {
   const { provider, walletAddress } = useWallet();
   const [watchlist, setWatchlist] = useState([]);
   const [tokenAddress, setTokenAddress] = useState('');
+  const [selectedToken, setSelectedToken] = useState(null); // Track selected token for modal
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
     // Load watchlist from localStorage
@@ -20,34 +24,36 @@ function Watchlist() {
       setWatchlist(storedWatchlist);
     }
   }, []);
+  
+
 
   useEffect(() => {
     // Save watchlist to localStorage whenever it changes
     localStorage.setItem('watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
 
-  useEffect(() => {
-    // Poll every 60 seconds to refresh balances
-    const intervalId = setInterval(refreshBalances, 60000);
+  const openModal = (token) => {
+    setSelectedToken(token); // Set the selected token details
+    setModalIsOpen(true);
+  };
 
-    return () => clearInterval(intervalId); // Cleanup on component unmount
-  }, [watchlist]);
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
 
   const addTokenToWatchlist = async () => {
     if (provider && tokenAddress) {
       try {
+        if (watchlist.findIndex((el) => el.address === tokenAddress) !== -1) {
+          console.log("Already added");
+          return;
+        }
         const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
-        
         const symbol = await tokenContract.symbol();
-        // const decimals = await tokenContract.decimals();
-        const balance = await tokenContract.balanceOf(tokenAddress);
-        // const formattedDecimals = ethers.formatUnits(decimals);
+        const balance = await tokenContract.balanceOf(walletAddress); // Corrected to fetch balance for walletAddress
         const formattedDecimals = 18;
-        
-
         const formattedBalance = ethers.formatUnits(balance, formattedDecimals);
-        console.log(formattedBalance);
-        
+
         const tokenData = {
           address: tokenAddress,
           symbol: symbol,
@@ -60,27 +66,6 @@ function Watchlist() {
       } catch (error) {
         console.error('Error adding token:', error);
       }
-    }
-  };
-
-  const refreshBalances = async () => {
-    if (provider && walletAddress) {
-      // console.log(watchlist.length);
-      
-      const updatedWatchlist = await Promise.all(
-        
-        watchlist.map(async (token) => {
-          const tokenContract = new ethers.Contract(token.address, ERC20_ABI, provider);
-          const balance = await tokenContract.balanceOf(token.address);
-          // console.log(balance);
-          const formattedBalance = ethers.formatUnits(balance, token.decimals);
-          return {
-            ...token,
-            balance: formattedBalance,
-          };
-        })
-      );
-      setWatchlist(updatedWatchlist);
     }
   };
 
@@ -100,17 +85,31 @@ function Watchlist() {
         placeholder="Enter token contract address"
       />
       <button onClick={addTokenToWatchlist}>Add Token</button>
-      <button onClick={refreshBalances}>Refresh Balances</button>
 
       <ul>
         {watchlist.map((token) => (
           <li key={token.address}>
             <p>Token: {token.symbol}</p>
             <p>Balance: {token.balance}</p>
+            <button onClick={() => openModal(token)}>View Details</button>
             <button onClick={() => removeTokenFromWatchlist(token.address)}>Remove</button>
           </li>
         ))}
       </ul>
+
+      {/* Modal for showing token details */}
+      <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
+      {selectedToken && selectedToken.address && (
+    <div>
+      <h2>{selectedToken.symbol} Details</h2>
+      <p>Balance: {selectedToken.balance}</p>
+      <p>Decimals: {selectedToken.decimals}</p>
+      {/* Render HistoricalData only when selectedToken.address is valid */}
+      <HistoricalData tokenAddress={selectedToken.address} />
+      <button onClick={closeModal}>Close</button>
+    </div>
+  )}
+      </Modal>
     </div>
   );
 }

@@ -34,8 +34,7 @@ function Home() {
       try {
         
         if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
-          const provider = new ethers.BrowserProvider(window.ethereum); // Changed according to the latest ethers.js version
-          
+          const provider = new ethers.BrowserProvider(window.ethereum); //providers changed since last time
           const accounts = await provider.send('eth_requestAccounts', []);
           const address = accounts[0];
 

@@ -11,9 +11,10 @@ import { useWallet } from './contexts/WalletContext';
 import { ethers } from 'ethers';
 
 function App() {
+  //wallet context
   const {isWalletConnected,setWalletConnected,walletAddress,setWalletAddress,loading,setLoading,setProvider} = useWallet();
-
-  useEffect(() => {
+  
+  useEffect(() => { //wallet connection at every reload
     const storedWalletAddress = localStorage.getItem('walletAddress');
     if (storedWalletAddress) {
       console.log("I ran first");
@@ -38,12 +39,11 @@ function App() {
       <div className="App">
 
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home />} /> {/* Entry at home */}
           {
-              isWalletConnected &&(
+              isWalletConnected &&(  
                 <>
                   <Route path="/watchlist" element={<Layout ><WatchList/></Layout>} />
-                  <Route path="/historical-data" element={<Layout ><HistoricalData/></Layout> } />
                   <Route path="/transfer" element={<Layout ><TokenTransfer/></Layout>} />
                   <Route path="/allowance" element={<Layout ><TokenAllowance/></Layout>} />
                 </>
