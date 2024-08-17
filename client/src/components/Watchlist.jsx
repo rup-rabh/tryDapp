@@ -8,12 +8,10 @@ const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)"
 ];
 
-
 function Watchlist() {
   const { provider, walletAddress } = useWallet();
   const [watchlist, setWatchlist] = useState([]);
   const [tokenAddress, setTokenAddress] = useState('');
-  const [tokenDetails, setTokenDetails] = useState({});
 
   useEffect(() => {
     // Load watchlist from localStorage
@@ -27,33 +25,62 @@ function Watchlist() {
     // Save watchlist to localStorage whenever it changes
     localStorage.setItem('watchlist', JSON.stringify(watchlist));
   }, [watchlist]);
-//0x6B175474E89094C44Da98b954EedeAC495271d0F
+
+  useEffect(() => {
+    // Poll every 60 seconds to refresh balances
+    const intervalId = setInterval(refreshBalances, 60000);
+
+    return () => clearInterval(intervalId); // Cleanup on component unmount
+  }, [watchlist]);
+
   const addTokenToWatchlist = async () => {
     if (provider && tokenAddress) {
       try {
-
-
         const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
         
         const symbol = await tokenContract.symbol();
-        
-        const decimals = await tokenContract.decimals();
+        // const decimals = await tokenContract.decimals();
         const balance = await tokenContract.balanceOf(tokenAddress);
-        console.log(typeof decimals);
+        // const formattedDecimals = ethers.formatUnits(decimals);
+        const formattedDecimals = 18;
+        
+
+        const formattedBalance = ethers.formatUnits(balance, formattedDecimals);
+        console.log(formattedBalance);
         
         const tokenData = {
           address: tokenAddress,
           symbol: symbol,
-          decimals: ethers.formatUnits(decimals),
-          balance: ethers.formatUnits(balance),
+          decimals: formattedDecimals,
+          balance: formattedBalance,
         };
-        
-        console.log(balance);
+
         setWatchlist([...watchlist, tokenData]);
         setTokenAddress('');
       } catch (error) {
         console.error('Error adding token:', error);
       }
+    }
+  };
+
+  const refreshBalances = async () => {
+    if (provider && walletAddress) {
+      // console.log(watchlist.length);
+      
+      const updatedWatchlist = await Promise.all(
+        
+        watchlist.map(async (token) => {
+          const tokenContract = new ethers.Contract(token.address, ERC20_ABI, provider);
+          const balance = await tokenContract.balanceOf(token.address);
+          // console.log(balance);
+          const formattedBalance = ethers.formatUnits(balance, token.decimals);
+          return {
+            ...token,
+            balance: formattedBalance,
+          };
+        })
+      );
+      setWatchlist(updatedWatchlist);
     }
   };
 
@@ -73,6 +100,7 @@ function Watchlist() {
         placeholder="Enter token contract address"
       />
       <button onClick={addTokenToWatchlist}>Add Token</button>
+      <button onClick={refreshBalances}>Refresh Balances</button>
 
       <ul>
         {watchlist.map((token) => (
